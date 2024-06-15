@@ -1,13 +1,23 @@
 import { prompt } from 'inquirer';
-import dotenv from 'dotenv';
 import { main } from "../src/index";
 
-dotenv.config();
+jest.mock('inquirer');
 
-describe("Hello World", () => {
-  it ("call main", () => {
-    const res = main();
+const mockedPrompt = prompt as jest.MockedFunction<typeof prompt>;
 
-    expect(res).toBe("Hello World");
+describe("CLI", () => {
+  const description = "hogehoge";
+  const chosenName = "foofoo"
+
+  beforeEach(() => {
+    mockedPrompt.mockClear();
+    mockedPrompt.mockResolvedValueOnce({ description })
+                // .mockResolvedValueOnce({ chosenName });
+  });
+
+  it ("入力した description が返ること", async () => {
+    const res = await main();
+
+    expect(res).toBe(description);
   });
 });
