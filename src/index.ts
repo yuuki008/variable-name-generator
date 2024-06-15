@@ -1,26 +1,37 @@
 import { prompt } from 'inquirer';
 import { generateVariableNames } from './openai';
 import dotenv from 'dotenv';
+import { execSync } from 'child_process';
 
 dotenv.config();
+
+const descriptionValidate = async(input: string) => {
+  if (!input) return "入力してください"
+
+  return true
+};
 
 export const main = async() => {
   const { description } = await prompt<{ description: string }>({
     type: "input",
     name: "description",
-    message: "変数の説明を入力してください"
+    message: "変数の説明: ",
+    validate: descriptionValidate
   });
 
-  const variableNames = await generateVariableNames(description);
+  const res = await generateVariableNames(description);
+
+  if (!res.success) return console.log(res.message);
 
   const { chosenName } = await prompt<{ chosenName: string }>({
     type: 'list',
     name: 'chosenName',
-    message: '適切な変数名を選択してください:',
-    choices: variableNames
+    message: '変数名: ',
+    choices: res.variables
   });
 
-  console.log(`選択された変数名: ${chosenName}`)
+  execSync(`echo "${chosenName}" | clipboard`);
+  console.log(`${chosenName}をコピーしました。`)
 };
 
 main()
