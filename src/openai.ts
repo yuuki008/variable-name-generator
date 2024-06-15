@@ -1,4 +1,5 @@
 import { Configuration, OpenAIApi } from 'openai';
+require('dotenv').config();
 
 console.log(process.env.OPENAI_API_KEY);
 const configuration = new Configuration({
@@ -12,7 +13,6 @@ export const generateVariableNames = async(description: string): Promise<string[
 
   const model = 'gpt-4';
   const prompt = `提案された変数名を日本語の説明に基づいて生成してください: ${description}`;
-
 
   try {
     const response = await openai.createCompletion({
@@ -28,6 +28,6 @@ export const generateVariableNames = async(description: string): Promise<string[
   } catch (error: any) {
     console.error("Error generating variable names: ",  error.response ? error.response.data : error.message);
     throw error;
-  };
+  }
 }
 
