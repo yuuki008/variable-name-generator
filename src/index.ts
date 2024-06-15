@@ -15,7 +15,7 @@ export const main = async() => {
   const { description } = await prompt<{ description: string }>({
     type: "input",
     name: "description",
-    message: "変数の説明: ",
+    message: "変数の説明",
     validate: descriptionValidate
   });
 
@@ -26,7 +26,7 @@ export const main = async() => {
   const { chosenName } = await prompt<{ chosenName: string }>({
     type: 'list',
     name: 'chosenName',
-    message: '変数名: ',
+    message: '変数名',
     choices: res.variables
   });
 
