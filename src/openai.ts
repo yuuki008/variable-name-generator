@@ -1,32 +1,56 @@
 
-import { Configuration, OpenAIApi } from 'openai';
-require('dotenv').config();
+import { Configuration, OpenAIApi, ChatCompletionRequestMessageRoleEnum, ChatCompletionRequestMessage } from 'openai';
+import dotenv from 'dotenv';
 
-console.log(process.env.OPENAI_API_KEY);
+dotenv.config();
+
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 const openai = new OpenAIApi(configuration);
 
-export const generateVariableNames = async(description: string): Promise<string[]> => {
-  console.log(process.env.OPENAI_API_KEY);
+interface VariableResponse {
+  success: boolean;
+  message: string;
+  variables: string[];
+}
 
-  const model = 'gpt-4';  // 最新のモデルを使用
-  const prompt = `提案された変数名を日本語の説明に基づいて生成してください: ${description}`;
+export const generateVariableNames = async (description: string): Promise<VariableResponse> => {
+  const model = 'gpt-4';
+  const messages: ChatCompletionRequestMessage[] = [
+    {
+      role: ChatCompletionRequestMessageRoleEnum.System,
+      content: "あなたは優秀なアシスタントです。JSONで結果を出力します。"
+    },
+    {
+      role: ChatCompletionRequestMessageRoleEnum.System,
+      content: "今から送る説明に基づいて適切な変数名を生成してください。生成に成功したかどうかをsuccess、候補となる変数名をvariablesというキーとしてください。またsuccessがfalseだった場合は、エラーメッセージをmessageというキーに格納してください。"
+    },
+    {
+      role: ChatCompletionRequestMessageRoleEnum.User,
+      content: description
+    }
+  ];
 
   try {
-    const response = await openai.createChatCompletion({
+    const response: any = await openai.createChatCompletion({
       model,
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 50,
+      messages,
+      max_tokens: 150,
       temperature: 0.7,
     });
 
-    return response.data.choices.map((choice: any) => choice.message.content.trim());
+    const responseContent = response.data.choices[0].message.content.trim();
+    const jsonResponse: VariableResponse = JSON.parse(responseContent);
+
+    return jsonResponse;
   } catch (error: any) {
-    console.error("Error generating variable names: ", error.response ? error.response.data : error.message);
-    throw error;
+    return {
+      success: false,
+      message: error.response ? error.response.data.error.message : error.message,
+      variables: [],
+    };
   }
 }
 
