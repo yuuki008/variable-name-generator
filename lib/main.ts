@@ -16,7 +16,7 @@ const main = async () => {
     const { description } = await inquirer.prompt({
         type: "input",
         name: "description",
-        message: "変数の説明",
+        message: "説明",
         validate: descriptionValidate
     });
 
@@ -26,7 +26,7 @@ const main = async () => {
     const { chosenName } = await inquirer.prompt({
         type: 'list',
         name: 'chosenName',
-        message: '変数名',
+        message: '候補',
         choices: res.variables
     });
 
